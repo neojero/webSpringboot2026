@@ -5,8 +5,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Repository;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import training.afpa.cda24060.web2026.config.CustomProperty;
 import training.afpa.cda24060.web2026.model.Person;
@@ -42,16 +45,23 @@ public class PersonRepository {
         String getPersonUrl = baseApiUrl + "/person/" + id;
 
         RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<Person> response = restTemplate.exchange(
-                getPersonUrl,
-                HttpMethod.GET,
-                null,
-                Person.class
-        );
 
-        log.debug("Get Person call " + response.getStatusCode());
-
-        return response.getBody();
+        try {
+            ResponseEntity<Person> response = restTemplate.exchange(
+                    getPersonUrl,
+                    HttpMethod.GET,
+                    null,
+                    Person.class
+            );
+            log.debug("Get Person call " + response.getStatusCode());
+            return response.getBody();
+        } catch (HttpClientErrorException | HttpServerErrorException e) {
+            // Récupère le code de statut
+            HttpStatus statusCode = (HttpStatus) e.getStatusCode();
+            log.error("Erreur lors de l'appel à l'API : {}", statusCode);
+            // Gérer l'erreur (ex : retourner null, lancer une exception personnalisée, etc.)
+            return null;
+        }
     }
 
     public Person createPerson(Person person) {
