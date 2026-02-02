@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <div th:replace="~{fragments/header :: head}"></div>
+</head>
+<body>
+
+<div th:replace="~{fragments/header :: header}"></div>
+<div th:replace="~{fragments/nav :: nav}"></div>
+
+<div class="container special">
+    <h2 class="h2">Modification d'une personne</h2>
+    <div>
+        <form method="post"
+              th:action="@{/saveperson}" th:object="${person}">
+            <div class="form-group">
+                <input type="hidden" th:field="*{id}" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="firstNameInput">Prénom</label>
+                <input type="text" th:field="*{firstname}" class="form-control" id="firstNameInput"
+                       name="firstNameInput" aria-describedby="firstNameHelp" placeholder="Saisir le prénom">
+                <small id="firstNameHelp" class="form-text text-muted">Merci d'écrire le prénom.</small>
+            </div>
+            <div class="form-group">
+                <label for="lastNameInput">Nom</label>
+                <input type="text" th:field="*{lastname}" class="form-control" id="lastNameInput"
+                       name="lastNameInput" aria-describedby="lastNameHelp" placeholder="Saisir le nom">
+                <small id="lastNameHelp" class="form-text text-muted">Merci d'écrire le nom.</small>
+            </div>
+            <button type="submit" class="btn btn-primary">Modifier</button>
+        </form>
+    </div>
+</div>
+
+<div th:replace="~{fragments/footer :: footer }"></div>
+<div th:replace="~{fragments/footer :: scripts}"></div>
+</body>
+</html>
