@@ -1,4 +1,4 @@
-FROM openjdk:21
+FROM eclipse-temurin:21-jdk-jammy
 
 # Définir des variables d'environnement
 ENV APP_HOME=/app
