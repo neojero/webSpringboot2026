@@ -98,7 +98,7 @@ pipeline {
             }
         }
     }
-    // aprés réalisation du pipeline, notification du résult sur discord
+    // après réalisation du pipeline, notification du résultat sur Discord
     post {
         always {
             allure([
@@ -108,14 +108,13 @@ pipeline {
                 reportBuildPolicy: 'ALWAYS',
                 results: [[path: 'target/allure-results']]
             ])
-        }
-        always {
-                sh """
-                curl -H "Content-Type: application/json" \
-                -X POST \
-                -d '{"content":"Build ${env.JOB_NAME} #${env.BUILD_NUMBER} - ${currentBuild.currentResult}"}' \
-                https://discord.com/api/webhooks/1207612022066257930/KhRPmk3UdtYqAU54Mh2errEnhEjeI2hn1U8L_9Kle0lXti6X5XHDtJ7kIzoP2V5orusU
-                """
+
+            sh """
+            curl -H "Content-Type: application/json" \
+            -X POST \
+            -d '{"content":"Build ${env.JOB_NAME} #${env.BUILD_NUMBER} - ${currentBuild.currentResult}"}' \
+            https://discord.com/api/webhooks/TON_WEBHOOK
+            """
         }
     }
 }
