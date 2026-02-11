@@ -1,0 +1,83 @@
+name: springboot_appweb_2026
+
+services:
+  mysql_server:
+    #build: ./infra/mysql
+    image: mysql:latest
+    container_name: mysql_server
+    restart : always
+    ports:
+      - "3396:3306"
+    volumes:
+      # volume pour la persistance
+      - ${MYSQL_DATA_DIR}:/var/lib/mysql
+      # volume pour les logs
+      - ${LOG_DIR_MYSQL}:/var/log/mysql
+      # volume pour initialiser et construire la BDD
+      - ${MYSQL_DUMP_DIR}/init.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MY_DATABASE}
+    networks:
+      - backend
+
+  phpmyadmin:
+    image: phpmyadmin:5.2.0
+    container_name: phpmyadmin
+    depends_on:
+      - mysql_server
+    environment:
+      PMA_HOST: mysql_server
+      PMA_PORT: 3306
+    ports:
+      - "8081:80"
+    networks:
+      - backend
+
+  apiprojet:
+    image: ${API_IMAGE_NAME}
+    container_name: apiprojet
+    restart: on-failure
+    ports:
+      - "9010:9000"
+    environment:
+      - SPRING_DATASOURCE_URL=${URL_BDD}
+      - SPRING_DATASOURCE_USERNAME=${MYSQL_USER}
+      - SPRING_DATASOURCE_PASSWORD=${MYSQL_PASSWORD}
+      # ici ce sont des parametres Dialect de Springboot pour la connexion BDD
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=${JPA_DIALECT}
+      - SPRING_JPA_SHOW_SQL=true
+      - SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL=true
+      # configuration de l'application spingboot api
+      #- SPRING_CONFIG_LOCATION=/app/application.properties
+    depends_on:
+      - mysql_server
+    networks:
+      - backend
+
+  webprojet:
+    image: ${WEB_IMAGE_NAME}
+    container_name: webprojet
+    ports:
+      - "9091:9001"
+    depends_on:
+      - apiprojet
+    environment:
+      # redefinition du paramatere de configuration URL vers l'API
+      - TRAINING.AFPA.CDA24060.WEB2026.APIURL=${URL_API}
+    # Un appel HTTP est effectué sur la route http://apiprojet:9000/persons
+    healthcheck:
+      test: curl -f http://apiprojet:9000/persons || exit 1
+      interval: 10s
+      retries: 5
+      start_period: 5s
+      timeout: 10s
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  data:
