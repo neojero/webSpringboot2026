@@ -50,7 +50,7 @@ services:
       - SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL=true
       - SPRING_PROFILES_ACTIVE=ci
       # configuration de l'application spingboot api
-      #- SPRING_CONFIG_LOCATION=${CONFIG_API_FOR_MDOCKER}application-ci.properties
+      - SPRING_CONFIG_LOCATION=${CONFIG_API_FOR_MDOCKER}application-ci.properties
     depends_on:
       - mysql_server
     networks:
