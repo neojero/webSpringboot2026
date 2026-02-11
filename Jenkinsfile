@@ -109,12 +109,12 @@ pipeline {
                 results: [[path: 'target/allure-results']]
             ])
 
-            sh """
-            curl -H "Content-Type: application/json" \
-            -X POST \
-            -d '{"content":"Build ${env.JOB_NAME} #${env.BUILD_NUMBER} - ${currentBuild.currentResult}"}' \
-            https://discord.com/api/webhooks/TON_WEBHOOK
-            """
+            //sh """
+            //curl -H "Content-Type: application/json" \
+            //-X POST \
+            //-d '{"content":"Build ${env.JOB_NAME} #${env.BUILD_NUMBER} - ${currentBuild.currentResult}"}' \
+            //https://discord.com/api/webhooks/TON_WEBHOOK
+            //"""
         }
     }
 }
