@@ -44,13 +44,11 @@ services:
       - SPRING_DATASOURCE_URL=${URL_BDD}
       - SPRING_DATASOURCE_USERNAME=${MYSQL_USER}
       - SPRING_DATASOURCE_PASSWORD=${MYSQL_PASSWORD}
+      - spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
       # ici ce sont des parametres Dialect de Springboot pour la connexion BDD
       - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=${JPA_DIALECT}
       - SPRING_JPA_SHOW_SQL=true
       - SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL=true
-      - SPRING_PROFILES_ACTIVE=ci
-      # configuration de l'application spingboot api
-      - SPRING_CONFIG_LOCATION=${CONFIG_API_FOR_MDOCKER}application-ci.properties
     depends_on:
       - mysql_server
     networks:
@@ -65,6 +63,7 @@ services:
       - apiprojet
     environment:
       # redefinition du paramatere de configuration URL vers l'API
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=${JPA_DIALECT}
       - TRAINING.AFPA.CDA24060.WEB2026.APIURL=${URL_API}
     # Un appel HTTP est effectué sur la route http://apiprojet:9000/persons
     healthcheck:
