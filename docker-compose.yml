@@ -3,7 +3,7 @@ name: springboot_appweb_2026
 services:
   mysql_server:
     #build: ./infra/mysql
-    image: mysql:latest
+    image: mysql:8.0
     container_name: mysql_server
     restart : always
     ports:
@@ -19,7 +19,7 @@ services:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MY_DATABASE}
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot" ]
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$MYSQL_ROOT_PASSWORD"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -54,6 +54,8 @@ services:
       - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=${JPA_DIALECT}
       - SPRING_JPA_SHOW_SQL=true
       - SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL=true
+    env_file:
+      - .env-api
     depends_on:
       mysql_server:
         condition: service_healthy
