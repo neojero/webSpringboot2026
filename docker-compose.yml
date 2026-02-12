@@ -49,8 +49,6 @@ services:
       - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=${JPA_DIALECT}
       - SPRING_JPA_SHOW_SQL=true
       - SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL=true
-    env_file:
-      - .env-api
     depends_on:
       mysql_server:
         condition: service_healthy
