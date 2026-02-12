@@ -44,13 +44,16 @@ services:
       - SPRING_DATASOURCE_URL=${URL_BDD}
       - SPRING_DATASOURCE_USERNAME=${MYSQL_USER}
       - SPRING_DATASOURCE_PASSWORD=${MYSQL_PASSWORD}
-      - spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+      - spring.datasource.driver-class-name=${MYSQL_DRIVER}
       # ici ce sont des parametres Dialect de Springboot pour la connexion BDD
       - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=${JPA_DIALECT}
       - SPRING_JPA_SHOW_SQL=true
       - SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL=true
+    env_file:
+      - .env-api
     depends_on:
-      - mysql_server
+      mysql_server:
+        condition: service_healthy
     networks:
       - backend
 
