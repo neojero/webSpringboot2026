@@ -50,7 +50,7 @@ services:
       - SPRING_JPA_SHOW_SQL=true
       - SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL=true
     env_file:
-      - .env-api
+      - infra/api/.env
     depends_on:
       - mysql_server
     networks:
