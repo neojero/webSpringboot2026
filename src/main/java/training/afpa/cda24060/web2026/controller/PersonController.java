@@ -1,13 +1,14 @@
 package training.afpa.cda24060.web2026.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
+import training.afpa.cda24060.web2026.dto.PersonPageResponseDTO;
+import training.afpa.cda24060.web2026.dto.filter.PersonFilterDTO;
 import training.afpa.cda24060.web2026.model.Person;
 import training.afpa.cda24060.web2026.service.PersonService;
 
@@ -18,9 +19,11 @@ public class PersonController {
     private PersonService personService;
 
     @GetMapping(value = {"/", "/home"})
-    public String home(Model model) {
-        Iterable<Person> listPersons = personService.getAllPersons();
-        model.addAttribute("listPersons", listPersons);
+    public String home(Model model, Pageable pageable, @ModelAttribute("filter") PersonFilterDTO filter) {
+        PersonPageResponseDTO pagePersons = personService.getAllPersons(pageable, filter);
+        model.addAttribute("pagePersons", pagePersons);
+        model.addAttribute("filter", filter);
+        model.addAttribute("listPersons", pagePersons.getContent());
         return "home";
     }
 

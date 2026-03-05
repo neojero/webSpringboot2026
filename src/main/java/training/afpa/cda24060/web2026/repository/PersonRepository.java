@@ -3,6 +3,8 @@ package training.afpa.cda24060.web2026.repository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -11,8 +13,13 @@ import org.springframework.stereotype.Repository;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 import training.afpa.cda24060.web2026.config.CustomProperty;
+import training.afpa.cda24060.web2026.dto.PersonPageResponseDTO;
+import training.afpa.cda24060.web2026.dto.filter.PersonFilterDTO;
 import training.afpa.cda24060.web2026.model.Person;
+
+import java.util.stream.Collectors;
 
 @Repository
 @Slf4j
@@ -21,28 +28,39 @@ public class PersonRepository {
     @Autowired
     private CustomProperty property;
 
-    public Iterable<Person> getPersons() {
-        // recupération de ma proprietes contenant l'url de l'API
+    public PersonPageResponseDTO getPersons(Pageable pageable, PersonFilterDTO filter) {
         String baseURL = property.getApiURL();
-        // construction de l'url pour appel à l'API
-        String getPersonsURL = baseURL + "/persons";
-        // construction de la requete HTTP
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseURL + "/api/persons")
+                .queryParam("page", pageable.getPageNumber())
+                .queryParam("size", pageable.getPageSize());
+
+        // Ajouter les paramètres de filtre si non vides
+        if (filter.getLastname() != null && !filter.getLastname().isEmpty()) {
+            builder.queryParam("lastname", filter.getLastname());
+        }
+        if (filter.getFirstname() != null && !filter.getFirstname().isEmpty()) {
+            builder.queryParam("firstname", filter.getFirstname());
+        }
+
+        pageable.getSort().forEach(order -> {
+            builder.queryParam("sort", order.getProperty() + "," + order.getDirection());
+        });
+
         RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<Iterable<Person>> response = restTemplate.exchange(
-                getPersonsURL,
+        ResponseEntity<PersonPageResponseDTO> response = restTemplate.exchange(
+                builder.toUriString(),
                 HttpMethod.GET,
                 null,
-                new ParameterizedTypeReference<>() {}
+                PersonPageResponseDTO.class
         );
 
         log.debug("Get Persons call {}", response.getStatusCode());
-        // envoi de la reponse.
         return response.getBody();
     }
 
     public Person getPerson(int id) {
         String baseApiUrl = property.getApiURL();
-        String getPersonUrl = baseApiUrl + "/person/" + id;
+        String getPersonUrl = baseApiUrl + "/api/person/" + id;
 
         RestTemplate restTemplate = new RestTemplate();
 
@@ -66,7 +84,7 @@ public class PersonRepository {
 
     public Person createPerson(Person person) {
         String baseApiUrl = property.getApiURL();
-        String createPersonsUrl = baseApiUrl + "/person";
+        String createPersonsUrl = baseApiUrl + "/api/person";
 
         RestTemplate restTemplate = new RestTemplate();
         HttpEntity<Person> request = new HttpEntity<>(person);
@@ -83,7 +101,7 @@ public class PersonRepository {
 
     public Person updatePerson(Person person) {
         String baseApiUrl = property.getApiURL();
-        String updatePersonUrl = baseApiUrl + "/person/" + person.getId();
+        String updatePersonUrl = baseApiUrl + "/api/person/" + person.getId();
 
         RestTemplate restTemplate = new RestTemplate();
         HttpEntity<Person> request = new HttpEntity<>(person);
@@ -100,7 +118,7 @@ public class PersonRepository {
 
     public void deletePerson(int id) {
         String baseApiUrl = property.getApiURL();
-        String deletePersonUrl = baseApiUrl + "/person/" + id;
+        String deletePersonUrl = baseApiUrl + "/api/person/" + id;
 
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<Void> response = restTemplate.exchange(

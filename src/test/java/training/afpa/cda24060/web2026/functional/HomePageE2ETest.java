@@ -9,7 +9,7 @@ import org.testng.annotations.Test;
 
 
 @Feature("Tests d'interface utilisateur")
-public class HomePageE2ETest extends BaseE2ETest {
+public class HomePageE2ETest extends ConfigE2ETest {
 
     @Test
     @Description("Vérifie que le titre de la page d'accueil est correct")

@@ -2,7 +2,11 @@ package training.afpa.cda24060.web2026.service;
 
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import training.afpa.cda24060.web2026.dto.PersonPageResponseDTO;
+import training.afpa.cda24060.web2026.dto.filter.PersonFilterDTO;
 import training.afpa.cda24060.web2026.model.Person;
 import training.afpa.cda24060.web2026.repository.PersonRepository;
 
@@ -18,8 +22,8 @@ public class PersonService {
         return personRepository.getPerson(id);
     }
 
-    public Iterable<Person> getAllPersons() {
-        return personRepository.getPersons();
+    public PersonPageResponseDTO getAllPersons(Pageable pageable, PersonFilterDTO filter) {
+        return personRepository.getPersons(pageable, filter);
     }
 
     public void detelePerson(final Integer id) {

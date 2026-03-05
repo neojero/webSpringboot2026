@@ -8,6 +8,24 @@
 <div th:replace="~{fragments/header :: header}"></div>
 <div th:replace="~{fragments/nav :: nav}"></div>
 
+<div class="container mt-4">
+    <h2 class="h2">Filtrage</h2>
+    <form th:action="@{/persons}" th:object="${filter}" method="get" class="form-inline mb-4">
+        <div class="form-group mr-2 mt-2">
+            <label for="lastname" class="mr-1 mt-1">Nom :</label>
+            <input type="text" id="lastname" th:field="*{lastname}" class="form-control" />
+        </div>
+        <div class="form-group mr-2 mt-2">
+            <label for="firstname" class="mr-1 mt-1">Prénom :</label>
+            <input type="text" id="firstname" th:field="*{firstname}" class="form-control" />
+        </div>
+        <button type="submit" class="btn btn-primary mt-4">Filtrer</button>
+        <a th:href="@{/home}" class="btn btn-secondary ml-4 mt-4">Réinitialiser</a>
+    </form>
+
+</div>
+
+
 <div class="container special mt-4">
     <h2 class="h2">Liste des personnes</h2>
     <div class="table-responsive">
@@ -16,6 +34,10 @@
             <tr>
                 <th>Prénom</th>
                 <th>Nom</th>
+                <th>rue</th>
+                <th>code postal</th>
+                <th>Ville</th>
+                <th>Actions</th> <!-- Ajout d'une colonne pour les actions -->
             </tr>
             </thead>
             <tbody>
@@ -23,8 +45,11 @@
                 <td colspan="3">Aucune personnes en base de données</td>
             </tr>
             <tr th:each="person: ${listPersons}">
-                <td><span th:text="${person.firstname}"> Prénom </span></td>
-                <td><span th:text="${person.lastname}"> Nom </span></td>
+                <td><span th:text="${person.firstname}"> Nom </span></td>
+                <td><span th:text="${person.lastname}"> Prénom </span></td>
+                <td><span th:text="${person.getAddress().getStreet()}"> rue </span></td>
+                <td><span th:text="${person.getAddress().getCp()}"> code postal </span></td>
+                <td><span th:text="${person.getAddress().getCity()}"> ville </span></td>
                 <td>
                     <a th:href="@{/updateperson/{id}(id=${person.id})}"><button class="btn btn-info">Modifier</button></a>
                     <a th:href="@{/deleteperson/{id}(id=${person.id})}"><button class="btn btn-danger">Supprimer</button></a>
@@ -33,6 +58,54 @@
             </tbody>
         </table>
     </div>
+
+    <!-- Informations sur la pagination -->
+    <div class="row mt-3">
+        <div class="col-md-12 text-center">
+            <p th:text="'Affichage des personnes ' + ${pagePersons.number * pagePersons.size + 1} +
+                   ' à ' + ${pagePersons.number * pagePersons.size + pagePersons.numberOfElements} +
+                   ' sur ' + ${pagePersons.totalElements} + ' au total'">
+                Affichage des personnes 1 à 10 sur 50 au total
+            </p>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <nav aria-label="Navigation de page" class="mt-2">
+        <ul class="pagination justify-content-center">
+            <!-- Lien "Précédent" -->
+            <li class="page-item" th:if="${!pagePersons.first}">
+                <a class="page-link" th:href="@{/persons(page=${pagePersons.number - 1},
+                size=${pagePersons.size}, lastname=${filter.lastname},
+                firstname=${filter.firstname})}"
+                   aria-label="Précédent">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+
+            <!-- Numéros de page -->
+            <li class="page-item" th:each="i : ${#numbers.sequence(0, pagePersons.totalPages - 1)}"
+                th:class="${i == pagePersons.number} ? 'page-item active' : 'page-item'">
+                <a class="page-link" th:href="@{/persons(page=${i},
+                size=${pagePersons.size},
+                lastname=${filter.lastname},
+                firstname=${filter.firstname}
+                )}" th:text="${i + 1}">1</a>
+            </li>
+
+            <!-- Lien "Suivant" -->
+            <li class="page-item" th:if="${!pagePersons.last}">
+                <a class="page-link" th:href="@{/persons(page=${pagePersons.number + 1},
+                size=${pagePersons.size},
+                lastname=${filter.lastname},
+                firstname=${filter.firstname})}"
+                   aria-label="Suivant">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
     <h4><a th:href="@{/createperson}">Ajouter une nouvelle personne</a></h4>
 </div>
 

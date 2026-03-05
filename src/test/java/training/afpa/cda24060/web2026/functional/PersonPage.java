@@ -22,7 +22,8 @@ public class PersonPage {
     // Éléments de la page home
     public WebElement getAddPersonButton() {
         try {
-            return wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("h4 a[href='/createperson']")));
+            return wait.until(ExpectedConditions.elementToBeClickable(
+                    By.cssSelector("h4 a[href='/createperson']")));
         } catch (Exception e) {
             throw new RuntimeException("Le bouton 'Ajouter une personne' n'a pas été trouvé.", e);
         }
@@ -30,7 +31,8 @@ public class PersonPage {
 
     public WebElement getFirstPersonInTable() {
         scollPage();
-        return wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("table tbody tr:last-child")));
+        return wait.until(ExpectedConditions.presenceOfElementLocated(
+                By.cssSelector("table tbody tr:last-child")));
     }
 
     // Éléments de la page createperson
