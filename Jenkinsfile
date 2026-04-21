@@ -102,7 +102,7 @@ pipeline {
     post {
         always {
             script {
-            if (fileExists('target/allure-results')) {
+                if (fileExists('target/allure-results')) {
                     allure([
                         includeProperties: false,
                         jdk: '',
@@ -110,6 +110,7 @@ pipeline {
                         reportBuildPolicy: 'ALWAYS',
                         results: [[path: 'target/allure-results']]
                     ])
+                }
             }
         }
     }
