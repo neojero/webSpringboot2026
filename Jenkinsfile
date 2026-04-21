@@ -1,17 +1,10 @@
 pipeline {
     // depuis m'importe quel agent Jenkins
     agent any
-    // declenche le pipeline sur push de la branche
-    triggers {
-        steps {
-            githubPush(branches: ['main'])
-        }
-    }
     // variables d'environment
     environment {
         // compte DockerHub paramétré sur le serveur Jenkins
         // dans la rubrique Credentials de l'administration serveur
-        token = 'tokengithubjenkins'
         registryCredential = 'DockerHubAccount'
     }
     // déclaration des outils que l'agent devra utiliser
@@ -88,8 +81,7 @@ pipeline {
         // verifie que le multi-conteneur fonctionne
         stage('Check Docker Containers') {
             steps {
-                // temps d'attente docker pour etre sur d'avoir les conteneur
-                timeout(time: 240, unit: 'SECONDS') {
+                timeout(time: 120, unit: 'SECONDS') {
                     script {
                         try {
                             def containers = bat(script: 'docker ps --format "{{.Names}}"', returnStdout: true).trim()
@@ -116,6 +108,13 @@ pipeline {
                 reportBuildPolicy: 'ALWAYS',
                 results: [[path: 'target/allure-results']]
             ])
+
+            //sh """
+            //curl -H "Content-Type: application/json" \
+            //-X POST \
+            //-d '{"content":"Build ${env.JOB_NAME} #${env.BUILD_NUMBER} - ${currentBuild.currentResult}"}' \
+            //https://discord.com/api/webhooks/TON_WEBHOOK
+            //"""
         }
     }
 }
