@@ -30,9 +30,10 @@ pipeline {
         stage('Git Checkout') {
             steps {
                 // récupération du dépôt GitHub du projet
-                git branch: 'main',
+                git( branch: 'main',
                     credentialsId: 'jenkins_github_PAT',
                     url: 'https://github.com/neojero/webSpringboot2026.git'
+                )
             }
         }
         // construction du JAR ou WAR avec maven
