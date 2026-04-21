@@ -30,10 +30,18 @@ pipeline {
         stage('Git Checkout') {
             steps {
                 // récupération du dépôt GitHub du projet
-                git( branch: 'main',
-                    credentialsId: 'jenkins_github_PAT',
-                    url: 'https://github.com/neojero/webSpringboot2026.git'
-                )
+                script {
+                    try {
+                        git(
+                            branch: 'main',
+                            credentialsId: 'jenkins_github_PAT',
+                            url: 'https://github.com/neojero/webSpringboot2026.git'
+                        )
+                    } catch (Exception e) {
+                        echo "Erreur lors du checkout : ${e.getMessage()}"
+                        currentBuild.result = 'FAILURE'
+                       }
+                }
             }
         }
         // construction du JAR ou WAR avec maven
