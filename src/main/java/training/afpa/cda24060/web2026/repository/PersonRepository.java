@@ -1,25 +1,18 @@
 package training.afpa.cda24060.web2026.repository;
 
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Repository;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.HttpServerErrorException;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import training.afpa.cda24060.web2026.config.CustomProperty;
 import training.afpa.cda24060.web2026.dto.PersonPageResponseDTO;
 import training.afpa.cda24060.web2026.dto.filter.PersonFilterDTO;
 import training.afpa.cda24060.web2026.model.Person;
 
-import java.util.stream.Collectors;
+import java.net.URI;
 
 @Repository
 @Slf4j
@@ -28,107 +21,113 @@ public class PersonRepository {
     @Autowired
     private CustomProperty property;
 
+    private WebClient webClient;
+
+    @PostConstruct
+    public void init() {
+
+        System.out.println("API URL = " + property.getApiURL());
+        this.webClient = WebClient.builder()
+                .baseUrl(property.getApiURL())
+                .build();
+    }
+
     public PersonPageResponseDTO getPersons(Pageable pageable, PersonFilterDTO filter) {
-        String baseURL = property.getApiURL();
-        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseURL + "/api/persons")
-                .queryParam("page", pageable.getPageNumber())
-                .queryParam("size", pageable.getPageSize());
+        try {
+            return webClient.get()
+                    .uri(uriBuilder -> {
 
-        // Ajouter les paramètres de filtre si non vides
-        if (filter.getLastname() != null && !filter.getLastname().isEmpty()) {
-            builder.queryParam("lastname", filter.getLastname());
+                        uriBuilder.path("/api/persons")
+                                .queryParam("page", pageable.getPageNumber())
+                                .queryParam("size", pageable.getPageSize());
+
+                        if (filter.getLastname() != null && !filter.getLastname().isEmpty()) {
+                            uriBuilder.queryParam("lastname", filter.getLastname());
+                        }
+
+                        if (filter.getFirstname() != null && !filter.getFirstname().isEmpty()) {
+                            uriBuilder.queryParam("firstname", filter.getFirstname());
+                        }
+
+                        pageable.getSort().forEach(order ->
+                                uriBuilder.queryParam("sort",
+                                        order.getProperty() + "," + order.getDirection())
+                        );
+
+                        return uriBuilder.build();
+                    })
+                    .retrieve()
+                    .bodyToMono(PersonPageResponseDTO.class)
+                    .block();
+        } catch (WebClientResponseException e) {
+            log.error("Erreur lors de l'appel GET /api/persons: {}", e.getMessage());
+            return null;
         }
-        if (filter.getFirstname() != null && !filter.getFirstname().isEmpty()) {
-            builder.queryParam("firstname", filter.getFirstname());
-        }
-
-        pageable.getSort().forEach(order -> {
-            builder.queryParam("sort", order.getProperty() + "," + order.getDirection());
-        });
-
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<PersonPageResponseDTO> response = restTemplate.exchange(
-                builder.toUriString(),
-                HttpMethod.GET,
-                null,
-                PersonPageResponseDTO.class
-        );
-
-        log.debug("Get Persons call {}", response.getStatusCode());
-        return response.getBody();
     }
 
     public Person getPerson(int id) {
-        String baseApiUrl = property.getApiURL();
-        String getPersonUrl = baseApiUrl + "/api/person/" + id;
-
-        RestTemplate restTemplate = new RestTemplate();
+        String uri = "/api/person/" + id;
+        log.debug("Get Person URI: {}", uri);
 
         try {
-            ResponseEntity<Person> response = restTemplate.exchange(
-                    getPersonUrl,
-                    HttpMethod.GET,
-                    null,
-                    Person.class
-            );
-            log.debug("Get Person call " + response.getStatusCode());
-            return response.getBody();
-        } catch (HttpClientErrorException | HttpServerErrorException e) {
-            // Récupère le code de statut
-            HttpStatus statusCode = (HttpStatus) e.getStatusCode();
-            log.error("Erreur lors de l'appel à l'API : {}", statusCode);
-            // Gérer l'erreur (ex : retourner null, lancer une exception personnalisée, etc.)
+            return webClient.get()
+                    .uri(uri)
+                    .retrieve()
+                    .bodyToMono(Person.class)
+                    .block();
+        } catch (WebClientResponseException e) {
+            log.error("Erreur lors de l'appel GET /api/person/{}: {}", id, e.getMessage());
             return null;
         }
     }
 
     public Person createPerson(Person person) {
-        String baseApiUrl = property.getApiURL();
-        String createPersonsUrl = baseApiUrl + "/api/person";
+        String uri = "/api/person";
+        log.debug("Create Person URI: {}", uri);
 
-        RestTemplate restTemplate = new RestTemplate();
-        HttpEntity<Person> request = new HttpEntity<>(person);
-        ResponseEntity<Person> response = restTemplate.exchange(
-                createPersonsUrl,
-                HttpMethod.POST,
-                request,
-                Person.class);
-
-        log.debug("Create Person call " + response.getStatusCode());
-
-        return response.getBody();
+        try {
+            return webClient.post()
+                    .uri(uri)
+                    .bodyValue(person)
+                    .retrieve()
+                    .bodyToMono(Person.class)
+                    .block();
+        } catch (WebClientResponseException e) {
+            log.error("Erreur lors de l'appel POST /api/person: {}", e.getMessage());
+            return null;
+        }
     }
 
     public Person updatePerson(Person person) {
-        String baseApiUrl = property.getApiURL();
-        String updatePersonUrl = baseApiUrl + "/api/person/" + person.getId();
+        String uri = "/api/person/" + person.getId();
+        log.debug("Update Person URI: {}", uri);
 
-        RestTemplate restTemplate = new RestTemplate();
-        HttpEntity<Person> request = new HttpEntity<>(person);
-        ResponseEntity<Person> response = restTemplate.exchange(
-                updatePersonUrl,
-                HttpMethod.PUT,
-                request,
-                Person.class);
-
-        log.debug("Update Person call " + response.getStatusCode());
-
-        return response.getBody();
+        try {
+            return webClient.put()
+                    .uri(uri)
+                    .bodyValue(person)
+                    .retrieve()
+                    .bodyToMono(Person.class)
+                    .block();
+        } catch (WebClientResponseException e) {
+            log.error("Erreur lors de l'appel PUT /api/person/{}: {}", person.getId(), e.getMessage());
+            return null;
+        }
     }
 
     public void deletePerson(int id) {
-        String baseApiUrl = property.getApiURL();
-        String deletePersonUrl = baseApiUrl + "/api/person/" + id;
+        String uri = "/api/person/" + id;
+        log.debug("Delete Person URI: {}", uri);
 
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<Void> response = restTemplate.exchange(
-                deletePersonUrl,
-                HttpMethod.DELETE,
-                null,
-                Void.class);
-
-        log.debug("Delete Person call " + response.getStatusCode());
+        try {
+            webClient.delete()
+                    .uri(uri)
+                    .retrieve()
+                    .toBodilessEntity()
+                    .block();
+        } catch (WebClientResponseException e) {
+            log.error("Erreur lors de l'appel DELETE /api/person/{}: {}", id, e.getMessage());
+        }
     }
-
-
 }
+

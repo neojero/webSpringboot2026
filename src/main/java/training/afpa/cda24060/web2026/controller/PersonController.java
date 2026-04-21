@@ -1,8 +1,8 @@
 package training.afpa.cda24060.web2026.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +12,7 @@ import training.afpa.cda24060.web2026.dto.filter.PersonFilterDTO;
 import training.afpa.cda24060.web2026.model.Person;
 import training.afpa.cda24060.web2026.service.PersonService;
 
+@EnableSpringDataWebSupport //configure automatiquement le support web pour Pageable.
 @Controller
 public class PersonController {
 

@@ -9,8 +9,8 @@
 <div th:replace="~{fragments/nav :: nav}"></div>
 
 <div class="container mt-4">
-    <h2 class="h2">Filtrage</h2>
-    <form th:action="@{/persons}" th:object="${filter}" method="get" class="form-inline mb-4">
+    <h3>☰</h3>
+    <form th:action="@{/home}" th:object="${filter}" method="get" class="form-inline mb-4">
         <div class="form-group mr-2 mt-2">
             <label for="lastname" class="mr-1 mt-1">Nom :</label>
             <input type="text" id="lastname" th:field="*{lastname}" class="form-control" />
@@ -22,12 +22,11 @@
         <button type="submit" class="btn btn-primary mt-4">Filtrer</button>
         <a th:href="@{/home}" class="btn btn-secondary ml-4 mt-4">Réinitialiser</a>
     </form>
-
 </div>
 
 
 <div class="container special mt-4">
-    <h2 class="h2">Liste des personnes</h2>
+    <h2 class="h2">👉🏻 Liste des personnes</h2>
     <div class="table-responsive">
         <table class="table table-striped table-sm">
             <thead>
@@ -42,7 +41,7 @@
             </thead>
             <tbody>
             <tr th:if="${#lists.isEmpty(listPersons)}">
-                <td colspan="3">Aucune personnes en base de données</td>
+                <td colspan="6">Aucune personnes en base de données</td>
             </tr>
             <tr th:each="person: ${listPersons}">
                 <td><span th:text="${person.firstname}"> Nom </span></td>
@@ -62,9 +61,9 @@
     <!-- Informations sur la pagination -->
     <div class="row mt-3">
         <div class="col-md-12 text-center">
-            <p th:text="'Affichage des personnes ' + ${pagePersons.number * pagePersons.size + 1} +
-                   ' à ' + ${pagePersons.number * pagePersons.size + pagePersons.numberOfElements} +
-                   ' sur ' + ${pagePersons.totalElements} + ' au total'">
+            <p th:text="'Affichage des personnes ' + ${pagePersons.number * pagePersons.size + 1} + ' à '
+            + ${pagePersons.number * pagePersons.size + pagePersons.numberOfElements}
+            +' sur ' + ${pagePersons.totalElements} + ' au total'">
                 Affichage des personnes 1 à 10 sur 50 au total
             </p>
         </div>
@@ -75,9 +74,8 @@
         <ul class="pagination justify-content-center">
             <!-- Lien "Précédent" -->
             <li class="page-item" th:if="${!pagePersons.first}">
-                <a class="page-link" th:href="@{/persons(page=${pagePersons.number - 1},
-                size=${pagePersons.size}, lastname=${filter.lastname},
-                firstname=${filter.firstname})}"
+                <a class="page-link"
+                   th:href="@{/home(page=${pagePersons.number - 1}, size=${pagePersons.size}, lastname=${filter.lastname}, firstname=${filter.firstname})}"
                    aria-label="Précédent">
                     <span aria-hidden="true">&laquo;</span>
                 </a>
@@ -86,25 +84,22 @@
             <!-- Numéros de page -->
             <li class="page-item" th:each="i : ${#numbers.sequence(0, pagePersons.totalPages - 1)}"
                 th:class="${i == pagePersons.number} ? 'page-item active' : 'page-item'">
-                <a class="page-link" th:href="@{/persons(page=${i},
-                size=${pagePersons.size},
-                lastname=${filter.lastname},
-                firstname=${filter.firstname}
-                )}" th:text="${i + 1}">1</a>
+                <a class="page-link"
+                   th:href="@{/home(page=${i}, size=${pagePersons.size}, lastname=${filter.lastname}, firstname=${filter.firstname})}"
+                   th:text="${i + 1}">1</a>
             </li>
 
             <!-- Lien "Suivant" -->
             <li class="page-item" th:if="${!pagePersons.last}">
-                <a class="page-link" th:href="@{/persons(page=${pagePersons.number + 1},
-                size=${pagePersons.size},
-                lastname=${filter.lastname},
-                firstname=${filter.firstname})}"
+                <a class="page-link"
+                   th:href="@{/home(page=${pagePersons.number + 1}, size=${pagePersons.size}, lastname=${filter.lastname}, firstname=${filter.firstname})}"
                    aria-label="Suivant">
                     <span aria-hidden="true">&raquo;</span>
                 </a>
             </li>
         </ul>
     </nav>
+
 
     <h4><a th:href="@{/createperson}">Ajouter une nouvelle personne</a></h4>
 </div>
