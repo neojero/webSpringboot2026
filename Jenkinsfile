@@ -29,7 +29,7 @@ pipeline {
         // il faut ensuite le créer dans les crédentials de Jenkins
         stage('Git Checkout') {
             steps {
-                // récupération du dépôt GitHub du projet+
+                // récupération du dépôt GitHub du projet
                 git branch: 'main',
                     credentialsId: 'jenkins_github_PAT',
                     url: 'https://github.com/neojero/webSpringboot2026.git'
@@ -101,20 +101,16 @@ pipeline {
     // après réalisation du pipeline, notification du résultat sur Discord
     post {
         always {
-            allure([
-                includeProperties: false,
-                jdk: '',
-                properties: [],
-                reportBuildPolicy: 'ALWAYS',
-                results: [[path: 'target/allure-results']]
-            ])
-
-            //sh """
-            //curl -H "Content-Type: application/json" \
-            //-X POST \
-            //-d '{"content":"Build ${env.JOB_NAME} #${env.BUILD_NUMBER} - ${currentBuild.currentResult}"}' \
-            //https://discord.com/api/webhooks/TON_WEBHOOK
-            //"""
+            script {
+            if (fileExists('target/allure-results')) {
+                    allure([
+                        includeProperties: false,
+                        jdk: '',
+                        properties: [],
+                        reportBuildPolicy: 'ALWAYS',
+                        results: [[path: 'target/allure-results']]
+                    ])
+            }
         }
     }
 }
